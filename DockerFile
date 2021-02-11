@@ -1,0 +1,32 @@
+FROM rustlang/rust:nightly as builder
+
+WORKDIR /devoye_todo
+
+COPY .env .env
+
+COPY diesel.toml diesel.toml
+
+COPY . .
+
+RUN cargo build --release
+
+# RUN cargo install --path .
+
+FROM debian:buster-slim
+
+RUN mkdir devoye_todo
+
+WORKDIR /devoye_todo
+
+# install libpq
+RUN apt-get update; \
+    apt-get install -y --no-install-recommends libpq-dev; \
+    rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /devoye_todo/target/release/actix_todo ./
+
+COPY --from=builder /devoye_todo/diesel.toml .
+COPY --from=builder /devoye_todo/.env .
+
+
+ENTRYPOINT [ "/devoye_todo/actix_todo" ]
