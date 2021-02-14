@@ -1,15 +1,13 @@
-use actix_web::{ get, post, put, patch, delete, web::{Data, Json, Path}, HttpResponse};
-use tracing::instrument;
+use actix_web::{ get, post, put, patch, delete, web::{Data, Json, Path}, HttpResponse, Result};
 use crate::utils::response::{ TodosResponse, TodoResponse, TodoError};
 use crate::models::todo::{ TodoData, UpdateTodoData};
 use crate::models::state::{ AppState };
 use crate::actors::todo_actors::{GetAllTodos ,Create, Update, Delete, Completed};
 
-#[get("/health")]
-#[instrument]
-pub async fn health() -> HttpResponse {
-    TodoResponse::success(true,None,Some("I'm Good".to_string()))
-}
+
+
+
+
 #[get("")]
 pub async fn get_todos(state: Data<AppState>) -> Result<HttpResponse, TodoError> {
     let db = state.as_ref().db.clone();

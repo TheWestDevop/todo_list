@@ -5,13 +5,27 @@ on:
     branches: [ master ]
 
 jobs:
+  cargo-deny:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        checks:
+          - advisories
+          - bans licenses sources
 
+    # Prevent sudden announcement of a new advisory from failing ci:
+    continue-on-error: ${{ matrix.checks == 'advisories' }}
   build:
 
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
+    - uses: EmbarkStudios/cargo-deny-action@v1
+      with:
+        log-level: warn
+        command: check
+        arguments: --all-features
     # - name: Access Docker
     #   env:
     #     DOCKER_USER:  ${{secrets.DOCKER_USER}}
@@ -23,6 +37,9 @@ jobs:
     - name: Code Coverage
       run: | 
               cargo install cargo-tarpaulin && cargo tarpaulin --ignore-tests
+    - name: Code Audit
+      run: | 
+              cargo install cargo-audit && cargo audit
 
     # - name: Building Docker Image
     #   run: |

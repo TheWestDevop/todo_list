@@ -58,18 +58,22 @@ pub enum TodoError {
     // #[display(fmt = "Validation error on field: {}", field)]
     // ValidationError { field: String },
 
-    #[display(fmt = "Something went wrong")]
+    #[display(fmt = "Something went wrong, Please try again later.")]
     InternalError,
 
     #[display(fmt = "You sent a bad request")]
-    BadClientData,
+    BadClientData ,
 
-    // #[display(fmt = "Connection timeout")]
-    // Timeout,
+    #[display(fmt = "url not found, check your input again")]
+    NotFound,
+
+    // #[display(fmt = "auth")]
+    // TokenNotFound,
+
 }
 
 impl error::ResponseError for TodoError {
-    fn error_response(&self) -> HttpResponse {
+     fn error_response(&self) -> HttpResponse {
         HttpResponseBuilder::new(self.status_code()).json(ErrorMessage::message(false, self.status_code().as_u16(), self.to_string())
         )
     }
@@ -78,7 +82,8 @@ impl error::ResponseError for TodoError {
             // TodoError::ValidationError { .. } => StatusCode::BAD_REQUEST,
             TodoError::InternalError => StatusCode::INTERNAL_SERVER_ERROR,
             TodoError::BadClientData => StatusCode::BAD_REQUEST,
-            // TodoError::Timeout => StatusCode::GATEWAY_TIMEOUT,
+            TodoError::NotFound => StatusCode::NOT_FOUND,
+            // TodoError::TokenNotFound => StatusCode::NON_AUTHORITATIVE_INFORMATION
         }
     }
 }
